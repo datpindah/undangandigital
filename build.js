@@ -22,8 +22,6 @@ const API_URL = \`\${SUPABASE_URL}/functions/v1/api\`;
   console.log('✅ config.js generated. API_URL =', `${supabaseUrl}/functions/v1/api`);
 }
 
-// Sync 404.html dengan index.html untuk Cloudflare Pages SPA routing
-const indexPath = path.join(__dirname, 'public', 'index.html');
-const notFoundPath = path.join(__dirname, 'public', '404.html');
-fs.copyFileSync(indexPath, notFoundPath);
-console.log('✅ 404.html synced with index.html');
+// 404.html is a smart router — DO NOT overwrite it
+// It detects /haflah/* vs wedding slugs and loads correct page
+console.log('✅ Smart 404.html preserved (not overwritten)');
