@@ -3,7 +3,135 @@
 // URL pattern: /haflah/:slug
 // ============================================================
 
+// ---- Animated Stars ----
+function initStars(primaryColor) {
+    const canvas = document.getElementById('stars-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    let stars = [];
+    let shootingStars = [];
+    let animFrame;
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = document.body.scrollHeight;
+    }
+
+    function createStars() {
+        stars = [];
+        const count = Math.floor((canvas.width * canvas.height) / 3000);
+        for (let i = 0; i < count; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: Math.random() * 1.8 + 0.3,
+                alpha: Math.random(),
+                speed: Math.random() * 0.01 + 0.003,
+                twinkleOffset: Math.random() * Math.PI * 2,
+            });
+        }
+    }
+
+    function createShootingStar() {
+        if (Math.random() > 0.97) {
+            shootingStars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height * 0.5,
+                len: Math.random() * 80 + 40,
+                speed: Math.random() * 8 + 4,
+                alpha: 1,
+                angle: Math.PI / 6,
+            });
+        }
+    }
+
+    function hexToRgb(hex) {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `${r},${g},${b}`;
+    }
+
+    const bgRgb = hexToRgb(primaryColor || '#1E40AF');
+
+    let tick = 0;
+    function draw() {
+        tick++;
+        canvas.height = document.body.scrollHeight;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Background gradient
+        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        grad.addColorStop(0, `rgba(${bgRgb}, 1)`);
+        grad.addColorStop(0.5, `rgba(${bgRgb}, 0.95)`);
+        grad.addColorStop(1, `rgba(${bgRgb}, 1)`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Stars
+        for (const s of stars) {
+            const alpha = 0.4 + 0.6 * Math.abs(Math.sin(tick * s.speed + s.twinkleOffset));
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.fill();
+        }
+
+        // Shooting stars
+        createShootingStar();
+        shootingStars = shootingStars.filter(ss => ss.alpha > 0.05);
+        for (const ss of shootingStars) {
+            ctx.beginPath();
+            ctx.moveTo(ss.x, ss.y);
+            ctx.lineTo(ss.x - ss.len * Math.cos(ss.angle), ss.y - ss.len * Math.sin(ss.angle));
+            const lineGrad = ctx.createLinearGradient(
+                ss.x, ss.y,
+                ss.x - ss.len * Math.cos(ss.angle),
+                ss.y - ss.len * Math.sin(ss.angle)
+            );
+            lineGrad.addColorStop(0, `rgba(255,255,200,${ss.alpha})`);
+            lineGrad.addColorStop(1, `rgba(255,255,200,0)`);
+            ctx.strokeStyle = lineGrad;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ss.x += ss.speed * Math.cos(ss.angle);
+            ss.y += ss.speed * Math.sin(ss.angle);
+            ss.alpha -= 0.025;
+        }
+
+        // Decorative large stars (★)
+        const bigStars = [
+            { x: 0.05, y: 0.04, size: 22 },
+            { x: 0.9,  y: 0.06, size: 18 },
+            { x: 0.15, y: 0.35, size: 14 },
+            { x: 0.82, y: 0.28, size: 16 },
+            { x: 0.5,  y: 0.15, size: 12 },
+            { x: 0.3,  y: 0.65, size: 15 },
+            { x: 0.75, y: 0.6,  size: 13 },
+        ];
+        for (const bs of bigStars) {
+            const pulse = 0.6 + 0.4 * Math.abs(Math.sin(tick * 0.02 + bs.x * 10));
+            ctx.font = `${bs.size}px serif`;
+            ctx.fillStyle = `rgba(253, 224, 71, ${pulse})`;
+            ctx.fillText('★', bs.x * canvas.width, bs.y * canvas.height);
+        }
+
+        animFrame = requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', () => { resize(); createStars(); });
+    resize();
+    createStars();
+    draw();
+}
+
+// ----
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Init stars dengan warna default dulu
+    initStars('#1E40AF');
+
     const slug = getSlugFromUrl();
     if (slug) {
         fetchHaflahData(slug);
@@ -45,6 +173,12 @@ function populateUI(data) {
     const secondary = data.secondary_color || '#F59E0B';
     document.documentElement.style.setProperty('--color-primary', primary);
     document.documentElement.style.setProperty('--color-secondary', secondary);
+
+    // Update body background
+    document.body.style.background = primary;
+
+    // Init animated stars with primary color
+    initStars(primary);
 
     // Cover
     if (data.banner_image) {

@@ -43,13 +43,40 @@
         body { font-family: 'Poppins', sans-serif; }
         h1, h2, h3 { font-family: 'Nunito', sans-serif; }
 
+        /* =============================================
+           STARS BACKGROUND — dipakai di cover & main
+           ============================================= */
         .star-bg {
-            background-image:
-                radial-gradient(circle, #ffffff 1px, transparent 1px),
-                radial-gradient(circle, #ffffff 1px, transparent 1px);
-            background-size: 50px 50px, 80px 80px;
-            background-position: 0 0, 25px 25px;
             background-color: var(--color-primary, #1E40AF);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Canvas bintang animasi */
+        #stars-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Semua section di atas canvas */
+        #cover, #main-content, nav.fixed {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Section backgrounds — semi transparan agar bintang tembus */
+        .section-glass {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .section-glass-dark {
+            background: rgba(30, 64, 175, 0.85);
+            backdrop-filter: blur(8px);
         }
 
         .animate-fade-up {
@@ -66,22 +93,27 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .cloud {
-            background: white;
-            border-radius: 50px;
-            position: relative;
+        /* Twinkle animation untuk bintang dekoratif */
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.7); }
         }
-        .cloud::before, .cloud::after {
-            content: '';
-            background: white;
-            border-radius: 50%;
-            position: absolute;
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
-        .cloud::before { width: 60%; height: 160%; top: -60%; left: 15%; }
+        .animate-twinkle { animation: twinkle 2s ease-in-out infinite; }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-bounce-slow { animation: bounce 2s infinite; }
+        .animate-spin-slow { animation: spin 8s linear infinite; }
+    </style>
         .cloud::after  { width: 40%; height: 130%; top: -40%; right: 10%; }
     </style>
 </head>
-<body class="bg-blue-50 text-gray-700">
+<body class="font-sans text-gray-700" style="background: var(--color-primary, #1E40AF); min-height: 100vh;">
+
+    <!-- Animated Stars Canvas (fixed background) -->
+    <canvas id="stars-canvas"></canvas>
 
     <!-- Audio -->
     <div id="audio-control" class="fixed bottom-4 right-4 z-50 hidden">
@@ -131,7 +163,7 @@
     <main id="main-content" class="opacity-0 transition-opacity duration-1000">
 
         <!-- 1. EVENT INFO -->
-        <section id="event-info" class="py-20 px-6 bg-gradient-to-b from-blue-50 to-white">
+        <section id="event-info" class="py-20 px-6 section-glass">
             <div class="max-w-2xl mx-auto text-center space-y-6">
                 <div class="inline-block bg-blue-100 text-blue-800 px-4 py-1 rounded-full text-sm font-semibold mb-2">📅 Informasi Acara</div>
                 <h2 id="main-event-name" class="text-3xl md:text-4xl font-extrabold text-blue-900 leading-tight"></h2>
@@ -153,7 +185,8 @@
         </section>
 
         <!-- 2. SCHEDULE -->
-        <section id="schedule" class="py-16 px-6 bg-white">
+        <section id="schedule" class="py-16 px-6 section-glass"
+            style="border-top: 1px solid rgba(255,255,255,0.3)">
             <div class="max-w-2xl mx-auto">
                 <div class="text-center mb-10">
                     <div class="inline-block bg-yellow-100 text-yellow-800 px-4 py-1 rounded-full text-sm font-semibold mb-2">🗓️ Rangkaian Acara</div>
@@ -167,10 +200,12 @@
         </section>
 
         <!-- 3. LOCATION -->
-        <section id="location" class="py-16 px-6 bg-blue-50">
+        <section id="location" class="py-16 px-6 section-glass-dark"
+            style="border-top: 1px solid rgba(255,255,255,0.2)">
             <div class="max-w-2xl mx-auto text-center space-y-6">
                 <div class="inline-block bg-blue-100 text-blue-800 px-4 py-1 rounded-full text-sm font-semibold">📍 Lokasi</div>
-                <h2 class="text-2xl font-extrabold text-blue-900">Tempat Pelaksanaan</h2>
+        <!-- 3. LOCATION content updates for dark section -->
+                <h2 class="text-2xl font-extrabold text-white">Tempat Pelaksanaan</h2>
                 <div class="bg-white rounded-2xl shadow-md p-6 text-left">
                     <p id="location-venue" class="font-bold text-blue-900 text-lg"></p>
                     <p id="location-address" class="text-gray-500 text-sm mt-1"></p>
@@ -183,7 +218,8 @@
         </section>
 
         <!-- 4. GALLERY -->
-        <section id="gallery" class="py-16 px-4 bg-white">
+        <section id="gallery" class="py-16 px-4 section-glass"
+            style="border-top: 1px solid rgba(255,255,255,0.3)">
             <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-10">
                     <div class="inline-block bg-yellow-100 text-yellow-800 px-4 py-1 rounded-full text-sm font-semibold mb-2">📸 Galeri</div>
@@ -198,7 +234,8 @@
         </section>
 
         <!-- 5. RSVP -->
-        <section id="rsvp" class="py-16 px-6 bg-blue-50">
+        <section id="rsvp" class="py-16 px-6 section-glass-dark"
+            style="border-top: 1px solid rgba(255,255,255,0.2)">
             <div class="max-w-lg mx-auto bg-white p-8 rounded-2xl shadow-xl">
                 <div class="text-center mb-6">
                     <div class="inline-block bg-blue-100 text-blue-800 px-4 py-1 rounded-full text-sm font-semibold mb-2">✉️ Konfirmasi</div>
