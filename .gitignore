@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Database files (SQLite - old)
+*.db
+*.db-shm
+*.db-wal
+database.db
+invitations.db
+
+# Uploads (old local storage)
+uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Supabase local dev
+supabase/.branches/
+supabase/.temp/

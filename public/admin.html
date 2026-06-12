@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Undangan Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4A6FA5',
+                        accent: '#6B8EB5',
+                        soft: '#B8C9E0',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Login Section -->
+    <section id="loginSection" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+            <h1 class="text-2xl font-bold text-center text-primary mb-6">Admin Login</h1>
+            <div id="loginError" class="hidden bg-red-100 text-red-600 p-3 rounded mb-4 text-sm text-center">Login gagal. Cek email/password.</div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="emailInput" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="passwordInput" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                </div>
+                <button id="loginBtn" class="w-full py-2 bg-primary text-white rounded-lg hover:bg-accent transition">Masuk</button>
+            </div>
+            <p class="text-center text-sm text-gray-500 mt-4">Belum punya akun? <a href="#" class="text-primary underline">Daftar</a> (Disabled)</p>
+        </div>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="hidden min-h-screen flex flex-col">
+        <nav class="bg-white shadow-md p-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-primary">Admin Dashboard</h1>
+            <button id="logoutBtn" class="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded">Logout</button>
+        </nav>
+
+        <div class="flex-1 container mx-auto p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Sidebar / Invitation List -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-sm h-fit">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="font-bold text-gray-700">Undangan Saya</h2>
+                    <button id="refreshInvitations" class="text-primary hover:text-accent">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+                </div>
+                <ul id="invitationList" class="space-y-3 text-sm">
+                    <!-- List items injected by JS -->
+                </ul>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="lg:col-span-3 space-y-6">
+                
+                <!-- 1. Create Invitation -->
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2">Buat Undangan Baru</h2>
+                    <form id="createInvitationForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" name="groom_name" placeholder="Nama Pria (Romeo)" class="px-4 py-2 border rounded" required>
+                        <input type="text" name="bride_name" placeholder="Nama Wanita (Juliet)" class="px-4 py-2 border rounded" required>
+                        <input type="text" name="slug" placeholder="URL Slug (romeo-juliet)" class="px-4 py-2 border rounded" required>
+                        <input type="date" name="wedding_date" class="px-4 py-2 border rounded" required>
+                        <button type="submit" class="md:col-span-2 py-2 bg-primary text-white rounded hover:bg-accent transition">Buat Undangan</button>
+                    </form>
+                </div>
+
+                <!-- 2. Edit Invitation -->
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2">Edit Konten Undangan</h2>
+                    <select id="editInvitationSelect" class="w-full px-4 py-2 border rounded mb-4">
+                        <option value="">Pilih undangan...</option>
+                    </select>
+                    <form id="editInvitationForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs text-gray-500">Nama Pria</label>
+                                <input type="text" name="groom_name" class="w-full px-4 py-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Nama Wanita</label>
+                                <input type="text" name="bride_name" class="w-full px-4 py-2 border rounded">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="text-xs text-gray-500">Orang Tua Mempelai Pria</label>
+                                <input type="text" name="groom_parents_text" class="w-full px-4 py-2 border rounded" placeholder="Putra dari Bpk. ... & Ibu ...">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="text-xs text-gray-500">Orang Tua Mempelai Wanita</label>
+                                <input type="text" name="bride_parents_text" class="w-full px-4 py-2 border rounded" placeholder="Putri dari Bpk. ... & Ibu ...">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Tanggal</label>
+                                <input type="date" name="wedding_date" class="w-full px-4 py-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Warna Utama (Hex)</label>
+                                <input type="color" name="primary_color" class="w-full h-10 border rounded cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Waktu Akad</label>
+                                <input type="text" name="akad_time" class="w-full px-4 py-2 border rounded" placeholder="08:00 WIB">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500">Waktu Resepsi</label>
+                                <input type="text" name="resepsi_time" class="w-full px-4 py-2 border rounded" placeholder="11:00 - 13:00 WIB">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="text-xs text-gray-500">Nama Venue</label>
+                                <input type="text" name="venue_name" class="w-full px-4 py-2 border rounded" placeholder="Masjid Agung">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="text-xs text-gray-500">Alamat Venue</label>
+                                <input type="text" name="venue_address" class="w-full px-4 py-2 border rounded" placeholder="Jl. Raya No. 123">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="text-xs text-gray-500">Link Google Maps</label>
+                                <input type="text" name="maps_url" class="w-full px-4 py-2 border rounded" placeholder="https://maps.google.com/...">
+                            </div>
+                            
+                            <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4 mt-2">
+                                <div>
+                                    <label class="text-xs text-gray-500">Bank</label>
+                                    <input type="text" name="gift_bank" class="w-full px-4 py-2 border rounded" placeholder="BCA">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500">No. Rekening</label>
+                                    <input type="text" name="gift_account_number" class="w-full px-4 py-2 border rounded" placeholder="123 456 7890">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-500">Nama Pemilik Rekening</label>
+                                    <input type="text" name="gift_account_name" class="w-full px-4 py-2 border rounded" placeholder="a.n Nama Mempelai">
+                                </div>
+                            </div>
+
+                            <!-- Couple Photos Upload (New) -->
+                             <div class="md:col-span-2 grid grid-cols-2 gap-4 border-t pt-4 mt-2">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Foto Pria</label>
+                                    <div id="currentGroomPhoto" class="mb-2 text-xs text-gray-500 hidden">Current: <a href="#" target="_blank" class="text-primary underline">View</a></div>
+                                    <input type="file" id="groomPhotoInput" accept="image/*" class="text-sm">
+                                    <button type="button" id="uploadGroomPhotoBtn" class="mt-2 text-xs bg-gray-200 px-2 py-1 rounded">Upload Foto Pria</button>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Foto Wanita</label>
+                                    <div id="currentBridePhoto" class="mb-2 text-xs text-gray-500 hidden">Current: <a href="#" target="_blank" class="text-primary underline">View</a></div>
+                                    <input type="file" id="bridePhotoInput" accept="image/*" class="text-sm">
+                                    <button type="button" id="uploadBridePhotoBtn" class="mt-2 text-xs bg-gray-200 px-2 py-1 rounded">Upload Foto Wanita</button>
+                                </div>
+                            </div>
+
+                            <!-- Music Upload (New) -->
+                            <div class="md:col-span-2 grid grid-cols-1 gap-4 border-t pt-4 mt-2">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Musik Latar</label>
+                                    <div id="currentMusic" class="mb-2 text-xs text-gray-500 hidden">Current: <a href="#" target="_blank" class="text-primary underline">Play</a></div>
+                                    <input type="file" id="musicInput" accept="audio/*" class="text-sm">
+                                    <button type="button" id="uploadMusicBtn" class="mt-2 text-xs bg-gray-200 px-2 py-1 rounded">Upload Musik</button>
+                                    <p class="text-xs text-gray-400 mt-1">Format: MP3, WAV</p>
+                                </div>
+                            </div>
+
+                        </div>
+                        <button type="submit" class="w-full py-2 bg-accent text-white rounded hover:bg-primary transition">Simpan Perubahan</button>
+                    </form>
+                </div>
+
+                <!-- 3. Manage Guests -->
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2">Daftar Tamu</h2>
+                    <select id="guestInvitationSelect" class="w-full px-4 py-2 border rounded mb-4">
+                        <option value="">Pilih undangan...</option>
+                    </select>
+                    
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="guestNameInput" placeholder="Nama Tamu" class="flex-1 px-4 py-2 border rounded">
+                        <button id="addGuestBtn" class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700">Tambah</button>
+                    </div>
+
+                    <!-- Bulk Upload (New) -->
+                    <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                        <h3 class="text-sm font-bold text-gray-700 mb-2">Upload Massal (Excel)</h3>
+                        <div class="flex items-center gap-2">
+                            <input type="file" id="bulkGuestInput" accept=".xlsx, .xls" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <button id="uploadBulkGuestBtn" class="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">Upload Excel</button>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Format: Kolom A = Nama Tamu</p>
+                    </div>
+
+                    <ul id="guestList" class="space-y-2 max-h-60 overflow-y-auto border rounded p-2">
+                        <!-- Guest list injected by JS -->
+                    </ul>
+                </div>
+
+                <!-- 4. Gallery & RSVP -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Gallery -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h2 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2">Galeri Foto</h2>
+                        <select id="galleryInvitationSelect" class="w-full px-4 py-2 border rounded mb-4">
+                            <option value="">Pilih undangan...</option>
+                        </select>
+                        <form id="uploadForm" class="flex gap-2 mb-4">
+                            <input type="file" id="imageInput" accept="image/*" class="w-full text-sm">
+                            <button type="submit" class="px-4 py-2 bg-primary text-white text-sm rounded">Upload</button>
+                        </form>
+                        <ul id="galleryList" class="space-y-2 text-xs"></ul>
+                    </div>
+
+                    <!-- RSVP -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h2 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2">Data RSVP</h2>
+                        <select id="rsvpInvitationSelect" class="w-full px-4 py-2 border rounded mb-4">
+                            <option value="">Pilih undangan...</option>
+                        </select>
+                        <button id="loadRsvpBtn" class="w-full py-2 bg-gray-200 text-gray-700 text-sm rounded mb-4 hover:bg-gray-300">Muat Data RSVP</button>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-500 uppercase bg-gray-50">
+                                    <tr>
+                                        <th class="px-2 py-1">Nama</th>
+                                        <th class="px-2 py-1">Hadir</th>
+                                        <th class="px-2 py-1">Jml</th>
+                                        <th class="px-2 py-1">Pesan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rsvpTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Notification container -->
+    <div id="adminNotif" class="hidden"></div>
+
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/admin.js"></script>
+</body>
+</html>

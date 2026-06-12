@@ -1,0 +1,9 @@
+# Cloudflare Pages routing rules
+# Admin panel
+/admin /admin.html 200
+
+# All invitation slugs route to index.html (client-side slug resolution)
+/:slug /index.html 200
+
+# Root
+/ /index.html 200
