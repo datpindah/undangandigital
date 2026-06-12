@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wedding Of</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4A6FA5',
+                        accent: '#6B8EB5',
+                        soft: '#B8C9E0',
+                    },
+                    fontFamily: {
+                        script: ['"Great Vibes"', 'cursive'],
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['"Montserrat"', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'floral-pattern': "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%234A6FA5\" fill-opacity=\"0.05\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')",
+                    },
+                    animation: {
+                        'spin-slow': 'spin 8s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Great+Vibes&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        .animate-fade-up {
+            animation: fadeUp 1s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-500 { animation-delay: 0.5s; }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hide scrollbar for gallery */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-700 bg-slate-50">
+
+    <!-- Audio Control -->
+    <div id="audio-control" class="fixed bottom-4 right-4 z-50 hidden">
+        <button id="musicBtn" class="bg-white/80 p-3 rounded-full shadow-lg text-primary hover:bg-white transition-all animate-spin-slow">
+            <!-- Icon Music -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
+        </button>
+    </div>
+    <audio id="bg-music" loop></audio>
+
+    <!-- 1. Cover Section -->
+    <section id="cover" class="fixed inset-0 z-50 flex flex-col items-center justify-center min-h-screen text-center bg-white bg-floral-pattern transition-transform duration-1000 ease-in-out">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/80 via-white/50 to-primary/10 pointer-events-none"></div>
+        
+        <div class="relative z-10 p-6 space-y-6">
+            <h3 class="text-xl tracking-widest uppercase font-serif text-primary animate-fade-up">The Wedding Of</h3>
+            
+            <h1 id="cover-names" class="text-5xl md:text-7xl font-script text-primary py-4 animate-fade-up delay-100">
+                Groom & Bride
+            </h1>
+            
+            <p id="cover-date" class="text-lg font-serif italic text-gray-600 animate-fade-up delay-200">
+                Monday, 01 January 2024
+            </p>
+
+            <div class="mt-8 p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-white shadow-lg max-w-xs mx-auto animate-fade-up delay-300">
+                <p class="text-sm text-gray-500 mb-2">Kepada Yth. Bapak/Ibu/Saudara/i:</p>
+                <h4 id="guest-display" class="text-xl font-bold text-gray-800 mb-4">Tamu Undangan</h4>
+                <button onclick="openInvitation()" class="px-6 py-2 bg-primary text-white rounded-full hover:bg-accent transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1 duration-300">
+                    Buka Undangan
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main id="main-content" class="opacity-0 transition-opacity duration-1000">
+        
+        <!-- 2. Couple Section -->
+        <section id="couple" class="min-h-screen py-20 px-6 flex flex-col items-center justify-center bg-gradient-to-b from-white to-blue-50 relative overflow-hidden">
+            <div class="absolute inset-0 bg-floral-pattern opacity-30"></div>
+            
+            <div class="relative z-10 text-center space-y-12 max-w-4xl mx-auto">
+                <div class="space-y-2" data-aos="fade-up">
+                    <h2 class="text-3xl font-serif text-primary">Mempelai</h2>
+                    <p class="text-gray-500 italic font-serif">Assalamu’alaikum Warahmatullahi Wabarakatuh</p>
+                    <p class="text-gray-600 max-w-lg mx-auto text-sm leading-relaxed mt-4">
+                        Dengan memohon Rahmat dan Ridho Allah SWT, kami bermaksud menyelenggarakan pernikahan putra-putri kami:
+                    </p>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
+                    <!-- Groom -->
+                    <div class="flex flex-col items-center space-y-4" data-aos="fade-right">
+                        <div class="relative w-40 h-40 md:w-48 md:h-48">
+                            <div class="absolute inset-0 rounded-full border-2 border-primary/30 transform scale-105"></div>
+                            <div class="absolute inset-0 rounded-full border-2 border-dashed border-primary transform rotate-12"></div>
+                            <div class="w-full h-full rounded-full overflow-hidden shadow-xl bg-gray-200">
+                                <img id="groom-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23e2e8f0'/%3E%3Ccircle cx='100' cy='80' r='35' fill='%2394a3b8'/%3E%3Cellipse cx='100' cy='160' rx='55' ry='40' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Groom" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                        <div>
+                            <h3 id="groom-name-display" class="text-3xl font-script text-primary mb-1">Romeo</h3>
+                            <p class="text-sm text-gray-500 font-sans" data-groom-parents>Putra dari Bpk. Fulan & Ibu Fulanah</p>
+                        </div>
+                    </div>
+
+                    <div class="text-5xl font-script text-accent animate-pulse">&</div>
+
+                    <!-- Bride -->
+                    <div class="flex flex-col items-center space-y-4" data-aos="fade-left">
+                        <div class="relative w-40 h-40 md:w-48 md:h-48">
+                            <div class="absolute inset-0 rounded-full border-2 border-primary/30 transform scale-105"></div>
+                            <div class="absolute inset-0 rounded-full border-2 border-dashed border-primary transform -rotate-12"></div>
+                            <div class="w-full h-full rounded-full overflow-hidden shadow-xl bg-gray-200">
+                                <img id="bride-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23fce7f3'/%3E%3Ccircle cx='100' cy='80' r='35' fill='%23f9a8d4'/%3E%3Cellipse cx='100' cy='160' rx='55' ry='40' fill='%23f9a8d4'/%3E%3C/svg%3E" alt="Bride" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                        <div>
+                            <h3 id="bride-name-display" class="text-3xl font-script text-primary mb-1">Juliet</h3>
+                            <p class="text-sm text-gray-500 font-sans" data-bride-parents>Putri dari Bpk. Fulan & Ibu Fulanah</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Event Section -->
+        <section id="event" class="py-20 px-6 bg-white relative">
+            <div class="max-w-4xl mx-auto text-center space-y-12">
+                <h2 class="text-4xl font-script text-primary mb-8" data-aos="fade-up">Waktu & Tempat</h2>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Akad Card -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow relative overflow-hidden group" data-aos="fade-up">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+                        <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-primary text-2xl group-hover:bg-primary group-hover:text-white transition-colors">
+                            💍
+                        </div>
+                        <h3 class="text-2xl font-serif text-gray-800 mb-4">Akad Nikah</h3>
+                        
+                        <div class="space-y-2 mb-6">
+                            <p id="akad-date-display" class="font-medium text-gray-600">Minggu, 01 Januari 2024</p>
+                            <p id="akad-time-display" class="text-xl font-bold text-primary">08:00 WIB</p>
+                        </div>
+                        
+                        <div class="text-sm text-gray-500 border-t pt-4">
+                            <p class="font-semibold text-gray-700">Bertempat di:</p>
+                            <p id="venue-name-display" class="mt-1">Masjid Agung</p>
+                        </div>
+                    </div>
+
+                    <!-- Resepsi Card -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow relative overflow-hidden group" data-aos="fade-up" data-aos-delay="100">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-accent"></div>
+                        <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-accent text-2xl group-hover:bg-accent group-hover:text-white transition-colors">
+                            🥂
+                        </div>
+                        <h3 class="text-2xl font-serif text-gray-800 mb-4">Resepsi</h3>
+                        
+                        <div class="space-y-2 mb-6">
+                            <p id="resepsi-date-display" class="font-medium text-gray-600">Minggu, 01 Januari 2024</p>
+                            <p id="resepsi-time-display" class="text-xl font-bold text-accent">11:00 - 13:00 WIB</p>
+                        </div>
+                        
+                        <div class="text-sm text-gray-500 border-t pt-4">
+                            <p class="font-semibold text-gray-700">Bertempat di:</p>
+                            <p id="venue-address-display" class="mt-1">Grand Hotel Ballroom</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8" data-aos="fade-up">
+                    <a id="map-link" href="https://maps.google.com" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-primary text-primary rounded-full hover:bg-primary hover:text-white transition-all duration-300 shadow-md">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Buka Peta Lokasi
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Gallery Section -->
+        <section id="gallery" class="py-20 px-4 bg-slate-50">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-script text-primary mb-2">Our Moments</h2>
+                    <div class="w-16 h-1 bg-primary mx-auto rounded-full"></div>
+                </div>
+
+                <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                    <!-- Gallery items will be injected here via JS -->
+                    <!-- Placeholder items for initial view -->
+                    <div class="aspect-square bg-gray-200 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer">
+                         <div class="w-full h-full bg-gray-300 flex items-center justify-center text-gray-400 group-hover:scale-110 transition-transform duration-500">
+                             <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                         </div>
+                    </div>
+                    <div class="aspect-square bg-gray-200 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer">
+                        <div class="w-full h-full bg-gray-300 flex items-center justify-center text-gray-400 group-hover:scale-110 transition-transform duration-500">
+                            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                   </div>
+                   <div class="aspect-square bg-gray-200 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer">
+                        <div class="w-full h-full bg-gray-300 flex items-center justify-center text-gray-400 group-hover:scale-110 transition-transform duration-500">
+                            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Gift Section -->
+        <section id="gift" class="py-20 px-6 bg-white bg-floral-pattern">
+            <div class="max-w-md mx-auto text-center space-y-8">
+                <h2 class="text-3xl font-serif text-primary">Wedding Gift</h2>
+                <p class="text-sm text-gray-500">Doa Restu Anda merupakan karunia yang sangat berarti bagi kami. Dan jika memberi adalah ungkapan tanda kasih Anda, Anda dapat memberi kado secara cashless.</p>
+                
+                <div class="space-y-4">
+                    <!-- Bank Card -->
+                    <div class="bg-gradient-to-br from-slate-100 to-slate-200 p-6 rounded-2xl shadow-inner border border-white">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="font-bold text-lg text-slate-600" data-gift-bank>BCA</span>
+                            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                        </div>
+                        <p class="text-2xl font-mono tracking-wider text-slate-800 mb-1" data-gift-account-number>123 456 7890</p>
+                        <p class="text-sm text-slate-500 mb-4" data-gift-account-name>a.n ROMEO</p>
+                        
+                        <button class="w-full py-2 bg-white text-primary text-sm font-medium rounded-lg shadow-sm hover:bg-primary hover:text-white transition-colors border border-primary/20 flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            Salin Nomor Rekening
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. RSVP Section -->
+        <section id="rsvp" class="py-20 px-6 bg-blue-50">
+            <div class="max-w-lg mx-auto bg-white p-8 rounded-2xl shadow-xl">
+                <h2 class="text-3xl font-script text-center text-primary mb-6">RSVP</h2>
+                <p class="text-center text-sm text-gray-500 mb-8">Mohon konfirmasi kehadiran Anda untuk membantu kami mempersiapkan acara.</p>
+                
+                <form id="rsvp-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                        <input type="text" name="guest_name" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Masukkan nama Anda">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kehadiran</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="flex items-center space-x-2 cursor-pointer bg-slate-50 p-3 rounded-lg border border-gray-200 hover:border-primary transition-colors">
+                                <input type="radio" name="attendance" value="hadir" class="text-primary focus:ring-primary" required>
+                                <span>Hadir</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer bg-slate-50 p-3 rounded-lg border border-gray-200 hover:border-red-400 transition-colors">
+                                <input type="radio" name="attendance" value="tidak" class="text-red-500 focus:ring-red-500">
+                                <span>Tidak Hadir</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Tamu</label>
+                        <select name="total_guest" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all">
+                            <option value="1">1 Orang</option>
+                            <option value="2">2 Orang</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pesan & Doa</label>
+                        <textarea name="message" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Tuliskan ucapan selamat..."></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-primary text-white font-semibold rounded-lg shadow-lg hover:bg-accent transition-all transform hover:-translate-y-1">
+                        Kirim Konfirmasi
+                    </button>
+                </form>
+
+                <div id="rsvp-success" class="hidden text-center py-8">
+                    <div class="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Terima Kasih!</h3>
+                    <p class="text-gray-600 mt-2">Konfirmasi kehadiran Anda telah kami terima.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. Footer -->
+        <footer class="py-12 bg-primary text-white text-center px-6">
+            <div class="max-w-md mx-auto space-y-6">
+                <p class="text-sm font-serif italic opacity-90">
+                    "Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya..."
+                </p>
+                <p class="text-xs uppercase tracking-widest opacity-70">QS. Ar-Rum: 21</p>
+                
+                <h2 id="footer-names" class="text-3xl font-script py-4">Romeo & Juliet</h2>
+                
+                <div class="text-xs opacity-60 pt-8 border-t border-white/20">
+                    &copy; 2024 Undangan Digital. All rights reserved.
+                </div>
+            </div>
+        </footer>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full shadow-2xl border border-white/50 z-40 flex items-center gap-6">
+            <a href="#couple" class="flex flex-col items-center text-gray-400 hover:text-primary transition-colors group">
+                <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                <span class="text-[10px] font-medium mt-0.5">Mempelai</span>
+            </a>
+            <a href="#event" class="flex flex-col items-center text-gray-400 hover:text-primary transition-colors group">
+                <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <span class="text-[10px] font-medium mt-0.5">Acara</span>
+            </a>
+            <a href="#gallery" class="flex flex-col items-center text-gray-400 hover:text-primary transition-colors group">
+                <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <span class="text-[10px] font-medium mt-0.5">Galeri</span>
+            </a>
+            <a href="#rsvp" class="flex flex-col items-center text-gray-400 hover:text-primary transition-colors group">
+                <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                <span class="text-[10px] font-medium mt-0.5">RSVP</span>
+            </a>
+        </nav>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50">
+            Berhasil disalin!
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="/js/config.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>
