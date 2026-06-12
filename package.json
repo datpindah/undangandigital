@@ -3,10 +3,14 @@
   "version": "2.0.0",
   "description": "Undangan Digital - Supabase + Cloudflare Pages",
   "scripts": {
+    "dev": "node server.js",
     "build": "node build.js"
   },
   "engines": {
     "node": "20.x"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
   },
   "keywords": [],
   "author": "",
