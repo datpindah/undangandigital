@@ -1,0 +1,3 @@
+/admin    /admin.html   200
+/haflah/:slug    /haflah.html   200
+/:slug    /index.html   200
