@@ -22,6 +22,4 @@ const API_URL = \`\${SUPABASE_URL}/functions/v1/api\`;
   console.log('✅ config.js generated. API_URL =', `${supabaseUrl}/functions/v1/api`);
 }
 
-// 404.html is a smart router — DO NOT overwrite it
-// It detects /haflah/* vs wedding slugs and loads correct page
-console.log('✅ Smart 404.html preserved (not overwritten)');
+console.log('✅ Build complete. Routing handled by Cloudflare Pages Functions middleware.');

@@ -565,18 +565,22 @@ function switchTab(tab) {
         haflah.classList.add('hidden');
         btnW.classList.add('border-primary', 'text-primary');
         btnW.classList.remove('border-transparent', 'text-gray-500');
+        btnH.classList.remove('border-blue-700', 'text-blue-700');
         btnH.classList.add('border-transparent', 'text-gray-500');
-        btnH.classList.remove('border-primary', 'text-primary');
     } else {
         haflah.classList.remove('hidden');
         wedding.classList.add('hidden');
         btnH.classList.add('border-blue-700', 'text-blue-700');
         btnH.classList.remove('border-transparent', 'text-gray-500');
-        btnW.classList.add('border-transparent', 'text-gray-500');
         btnW.classList.remove('border-primary', 'text-primary');
+        btnW.classList.add('border-transparent', 'text-gray-500');
         loadHaflahList();
     }
 }
+
+// Wire up tab buttons via event listeners (not inline onclick)
+document.getElementById('tabWedding')?.addEventListener('click', () => switchTab('wedding'));
+document.getElementById('tabHaflah')?.addEventListener('click', () => switchTab('haflah'));
 
 // ============================================================
 // HAFLAH — State
