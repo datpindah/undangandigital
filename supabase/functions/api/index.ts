@@ -51,11 +51,12 @@ serve(async (req: Request) => {
 
   const url = new URL(req.url);
 
-  // Supabase strips the function name from the path.
-  // Full call: /functions/v1/api/invitations/my
-  // url.pathname inside function: /invitations/my
-  // So segments[0] = 'invitations', segments[1] = 'my'
-  const segments = url.pathname.replace(/^\/+/, "").split("/").filter(Boolean);
+  // Supabase TIDAK memotong nama function dari path.
+  // Full path yang masuk: /api/invitations/my
+  // Jadi kita strip prefix /api/ dulu
+  const rawPath = url.pathname.replace(/^\/+/, ""); // "api/invitations/my"
+  const pathWithoutFunction = rawPath.replace(/^api\/?/, ""); // "invitations/my"
+  const segments = pathWithoutFunction.split("/").filter(Boolean);
   const resource = segments[0];
   const { supabase, admin } = getClients(req);
 
