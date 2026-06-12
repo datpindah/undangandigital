@@ -1,15 +1,15 @@
 // ============================================================
 // Single Edge Function: api
-// Handles all routes:
-//   /api/invitations/*
-//   /api/rsvp/*
-//   /api/gallery/*
-//   /api/guests/*
+// URL: https://yyuibmahnvmkplphacfq.supabase.co/functions/v1/api
+// Routes:
+//   /invitations, /invitations/my, /invitations/:slug, /invitations/:id/couple-photo, /invitations/:id/music
+//   /rsvp, /rsvp/:invitation_id
+//   /gallery/upload, /gallery/:invitation_id, /gallery/:id
+//   /guests, /guests/bulk, /guests/:invitation_id, /guests/:id
 // ============================================================
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// ---- CORS ----
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -30,13 +30,10 @@ function err(message: string, status = 400): Response {
   });
 }
 
-// ---- Supabase clients ----
 function getClients(req: Request) {
   const url = Deno.env.get("SUPABASE_URL")!;
   const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
-  // SUPABASE_SERVICE_ROLE_KEY is reserved by Supabase, so we use SERVICE_ROLE_KEY
   const service = Deno.env.get("SERVICE_ROLE_KEY")!;
-
   const supabase = createClient(url, anon, {
     global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
   });
@@ -49,25 +46,30 @@ async function getUser(supabase: any) {
   return user ?? null;
 }
 
-// ---- Main handler ----
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const url = new URL(req.url);
-  // pathname example: /api/invitations/my  or  /api/rsvp
-  const segments = url.pathname.replace(/^\/api\/?/, "").split("/").filter(Boolean);
-  const resource = segments[0]; // invitations | rsvp | gallery | guests
+
+  // Supabase strips the function name from the path.
+  // Full call: /functions/v1/api/invitations/my
+  // url.pathname inside function: /invitations/my
+  // So segments[0] = 'invitations', segments[1] = 'my'
+  const segments = url.pathname.replace(/^\/+/, "").split("/").filter(Boolean);
+  const resource = segments[0];
   const { supabase, admin } = getClients(req);
+
+  console.log(`[api] ${req.method} ${url.pathname} | resource=${resource} segments=${JSON.stringify(segments)}`);
 
   try {
     // ===========================================================
     // INVITATIONS
     // ===========================================================
     if (resource === "invitations") {
-      const sub = segments[1]; // 'my' | slug/id | undefined
+      const sub = segments[1];    // 'my' | slug | id | undefined
       const action = segments[2]; // 'couple-photo' | 'music' | undefined
 
-      // POST /api/invitations
+      // POST /invitations — buat undangan baru
       if (req.method === "POST" && !sub) {
         const user = await getUser(supabase);
         if (!user) return err("Unauthorized", 401);
@@ -94,13 +96,14 @@ serve(async (req: Request) => {
         }).select().single();
 
         if (error) {
+          console.error("insert invitation error:", error);
           if (error.code === "23505") return err("Slug sudah digunakan", 400);
-          throw error;
+          return err(error.message, 500);
         }
         return json({ message: "Invitation created successfully", invitationId: data.id, slug: finalSlug }, 201);
       }
 
-      // GET /api/invitations/my
+      // GET /invitations/my
       if (req.method === "GET" && sub === "my") {
         const user = await getUser(supabase);
         if (!user) return err("Unauthorized", 401);
@@ -110,20 +113,17 @@ serve(async (req: Request) => {
         return json(data);
       }
 
-      // GET /api/invitations/:slug — public
+      // GET /invitations/:slug — public
       if (req.method === "GET" && sub && !action) {
         const { data: invitation, error } = await admin
           .from("invitations").select("*").eq("slug", sub).single();
         if (error || !invitation) return err("Invitation not found", 404);
-
         const { data: gallery } = await admin.from("gallery")
-          .select("*").eq("invitation_id", invitation.id)
-          .order("created_at", { ascending: true });
-
+          .select("*").eq("invitation_id", invitation.id).order("created_at", { ascending: true });
         return json({ ...invitation, gallery: gallery || [] });
       }
 
-      // PUT /api/invitations/:id
+      // PUT /invitations/:id
       if (req.method === "PUT" && sub && !action) {
         const user = await getUser(supabase);
         if (!user) return err("Unauthorized", 401);
@@ -140,7 +140,7 @@ serve(async (req: Request) => {
         return json({ message: "Invitation updated successfully" });
       }
 
-      // DELETE /api/invitations/:id
+      // DELETE /invitations/:id
       if (req.method === "DELETE" && sub && !action) {
         const user = await getUser(supabase);
         if (!user) return err("Unauthorized", 401);
@@ -148,10 +148,8 @@ serve(async (req: Request) => {
           .select("groom_image,bride_image,music_url")
           .eq("id", sub).eq("user_id", user.id).single();
         if (!inv) return err("Not found or not authorized", 404);
-
         const { data: galleryItems } = await supabase.from("gallery")
           .select("image_path").eq("invitation_id", sub);
-
         const paths: string[] = [];
         const ep = (u: string | null) => {
           if (!u) return;
@@ -161,14 +159,13 @@ serve(async (req: Request) => {
         ep(inv.groom_image); ep(inv.bride_image); ep(inv.music_url);
         for (const g of galleryItems || []) ep(g.image_path);
         if (paths.length) await admin.storage.from("uploads").remove(paths);
-
         const { error } = await supabase.from("invitations")
           .delete().eq("id", sub).eq("user_id", user.id);
         if (error) throw error;
         return json({ message: "Invitation deleted successfully" });
       }
 
-      // POST /api/invitations/:id/couple-photo
+      // POST /invitations/:id/couple-photo
       if (req.method === "POST" && action === "couple-photo") {
         const user = await getUser(supabase);
         if (!user) return err("Unauthorized", 401);
@@ -191,7 +188,7 @@ serve(async (req: Request) => {
         return json({ message: "Foto berhasil diupload", path: pu.publicUrl });
       }
 
-      // POST /api/invitations/:id/music
+      // POST /invitations/:id/music
       if (req.method === "POST" && action === "music") {
         const user = await getUser(supabase);
         if (!user) return err("Unauthorized", 401);
@@ -218,7 +215,7 @@ serve(async (req: Request) => {
     if (resource === "rsvp") {
       const sub = segments[1];
 
-      // POST /api/rsvp — public
+      // POST /rsvp — public
       if (req.method === "POST" && !sub) {
         const body = await req.json();
         const { invitation_id, guest_name, attendance, total_guest, message } = body;
@@ -239,7 +236,7 @@ serve(async (req: Request) => {
         return json({ message: "RSVP sent successfully", id: data.id }, 201);
       }
 
-      // GET /api/rsvp/:invitation_id — protected
+      // GET /rsvp/:invitation_id — protected
       if (req.method === "GET" && sub) {
         const user = await getUser(supabase);
         if (!user) return err("Unauthorized", 401);
@@ -257,9 +254,9 @@ serve(async (req: Request) => {
     // GALLERY
     // ===========================================================
     if (resource === "gallery") {
-      const sub = segments[1]; // 'upload' | invitation_id | gallery_id
+      const sub = segments[1];
 
-      // POST /api/gallery/upload — protected
+      // POST /gallery/upload — protected
       if (req.method === "POST" && sub === "upload") {
         const user = await getUser(supabase);
         if (!user) return err("Unauthorized", 401);
@@ -285,7 +282,7 @@ serve(async (req: Request) => {
         return json({ message: "Image uploaded successfully", id: data.id, image_path: pu.publicUrl }, 201);
       }
 
-      // GET /api/gallery/:invitation_id — public
+      // GET /gallery/:invitation_id — public
       if (req.method === "GET" && sub) {
         const { data, error } = await admin.from("gallery")
           .select("*").eq("invitation_id", sub).order("created_at", { ascending: true });
@@ -293,7 +290,7 @@ serve(async (req: Request) => {
         return json(data || []);
       }
 
-      // DELETE /api/gallery/:id — protected
+      // DELETE /gallery/:id — protected
       if (req.method === "DELETE" && sub) {
         const user = await getUser(supabase);
         if (!user) return err("Unauthorized", 401);
@@ -313,11 +310,11 @@ serve(async (req: Request) => {
     // GUESTS
     // ===========================================================
     if (resource === "guests") {
-      const sub = segments[1]; // 'bulk' | invitation_id | guest_id
+      const sub = segments[1];
       const user = await getUser(supabase);
       if (!user) return err("Unauthorized", 401);
 
-      // POST /api/guests/bulk
+      // POST /guests/bulk
       if (req.method === "POST" && sub === "bulk") {
         const formData = await req.formData();
         const invitation_id = formData.get("invitation_id") as string | null;
@@ -327,7 +324,7 @@ serve(async (req: Request) => {
           .select("id").eq("id", invitation_id).eq("user_id", user.id).single();
         if (!inv) return err("Not found or not authorized", 404);
         const text = await file.text();
-        const lines = text.split(/\r?\n/).filter((l) => l.trim());
+        const lines = text.split(/\r?\n/).filter((l: string) => l.trim());
         let addedCount = 0;
         for (const line of lines) {
           const name = line.split(",")[0].replace(/^["']|["']$/g, "").trim();
@@ -340,7 +337,7 @@ serve(async (req: Request) => {
         return json({ message: `Berhasil menambahkan ${addedCount} tamu` }, 201);
       }
 
-      // POST /api/guests
+      // POST /guests
       if (req.method === "POST" && !sub) {
         const body = await req.json();
         const { invitation_id, guest_name, slug: cs } = body;
@@ -362,7 +359,7 @@ serve(async (req: Request) => {
         return json({ id: data.id, slug: finalSlug }, 201);
       }
 
-      // GET /api/guests/:invitation_id
+      // GET /guests/:invitation_id
       if (req.method === "GET" && sub) {
         const { data: inv } = await supabase.from("invitations")
           .select("id,slug").eq("id", sub).eq("user_id", user.id).single();
@@ -374,7 +371,7 @@ serve(async (req: Request) => {
         return json({ invitation_slug: inv.slug, guests: guests || [] });
       }
 
-      // DELETE /api/guests/:id
+      // DELETE /guests/:id
       if (req.method === "DELETE" && sub) {
         const { data: guest } = await supabase.from("guests")
           .select("id,invitation_id").eq("id", sub).single();
@@ -388,9 +385,11 @@ serve(async (req: Request) => {
       }
     }
 
-    return err("Not Found", 404);
-  } catch (e) {
-    console.error(e);
-    return err("Server error", 500);
+    // Debug: tampilkan info request jika tidak ada route yang cocok
+    return err(`Route tidak ditemukan: ${req.method} ${url.pathname}`, 404);
+
+  } catch (e: any) {
+    console.error("[api] error:", e?.message || e);
+    return err(e?.message || "Server error", 500);
   }
 });
