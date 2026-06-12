@@ -34,7 +34,8 @@ function err(message: string, status = 400): Response {
 function getClients(req: Request) {
   const url = Deno.env.get("SUPABASE_URL")!;
   const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  // SUPABASE_SERVICE_ROLE_KEY is reserved by Supabase, so we use SERVICE_ROLE_KEY
+  const service = Deno.env.get("SERVICE_ROLE_KEY")!;
 
   const supabase = createClient(url, anon, {
     global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
