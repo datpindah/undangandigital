@@ -47,6 +47,18 @@ const server = http.createServer((req, res) => {
     urlPath = '/admin.html';
   }
 
+  // /haflah/:slug → haflah.html
+  if (urlPath.startsWith('/haflah/') || urlPath === '/haflah') {
+    filePath = path.join(PUBLIC_DIR, 'haflah.html');
+    const contentType = 'text/html';
+    fs.readFile(filePath, (err, data) => {
+      if (err) { res.writeHead(404); res.end('Not Found'); return; }
+      res.writeHead(200, { 'Content-Type': contentType });
+      res.end(data);
+    });
+    return;
+  }
+
   // Root → index.html
   if (urlPath === '/') {
     urlPath = '/index.html';
