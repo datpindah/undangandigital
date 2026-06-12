@@ -16,12 +16,25 @@ function getSlugFromUrl() {
 
 async function fetchInvitationData(slug) {
     if (!slug) {
-        showError('Undangan tidak ditemukan.');
+        showError('Buka undangan dengan URL lengkap, contoh: /nama-slug');
+        return;
+    }
+
+    const apiUrl = (typeof API_URL !== 'undefined') ? API_URL : null;
+    console.log('[debug] slug:', slug);
+    console.log('[debug] API_URL:', apiUrl);
+
+    if (!apiUrl) {
+        showError('Konfigurasi API tidak ditemukan. Cek config.js');
         return;
     }
 
     try {
-        const response = await fetch(`${API_URL}/invitations/${slug}`);
+        const fullUrl = `${apiUrl}/invitations/${slug}`;
+        console.log('[debug] fetching:', fullUrl);
+        const response = await fetch(fullUrl);
+        console.log('[debug] status:', response.status);
+
         if (!response.ok) {
             const err = await response.json().catch(() => ({}));
             throw new Error(err.message || 'Invitation not found');
@@ -30,8 +43,8 @@ async function fetchInvitationData(slug) {
         const data = await response.json();
         populateUI(data);
     } catch (error) {
-        console.error('Error fetching invitation:', error);
-        showError('Undangan tidak ditemukan atau terjadi kesalahan.');
+        console.error('[debug] error:', error.message);
+        showError('Undangan tidak ditemukan atau terjadi kesalahan. (' + error.message + ')');
     }
 }
 
